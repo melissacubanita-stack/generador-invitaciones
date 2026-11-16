@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Invitaciones · Sheet & Sweet</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Poppins,sans-serif;background:#fdf6f8;color:#3b2a30}
+header{background:linear-gradient(90deg,#f7c6d3,#fbe3ea);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+header h1{font-family:'Great Vibes',cursive;font-size:34px;color:#8a3a55;font-weight:400}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button{font-family:Poppins;border:none;border-radius:999px;padding:10px 18px;font-weight:600;cursor:pointer;font-size:14px}
+.primary{background:#c2557a;color:#fff}
+.ghost{background:#fff;color:#8a3a55;border:1px solid #e6a9bb}
+main{display:grid;grid-template-columns:400px 1fr;gap:0;height:calc(100vh - 74px)}
+form{overflow-y:auto;padding:18px;background:#fff;border-right:1px solid #f1d5de}
+fieldset{border:1px solid #f1d5de;border-radius:14px;padding:14px;margin-bottom:14px}
+legend{padding:0 6px;font-weight:600;color:#8a3a55;font-size:14px}
+label{display:block;font-size:12px;color:#7a5a65;margin:8px 0 4px}
+input,textarea,select{width:100%;padding:9px 11px;border:1px solid #ecc9d4;border-radius:10px;font-family:Poppins;font-size:14px;background:#fffafb}
+textarea{min-height:64px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.theme{border:2px solid transparent;border-radius:12px;padding:8px;font-size:11px;text-align:center;cursor:pointer;background:#faf3f5}
+.theme.on{border-color:#c2557a}
+.sw{display:flex;height:18px;border-radius:6px;overflow:hidden;margin-bottom:4px}
+.sw span{flex:1}
+.ev{border:1px dashed #ecc9d4;border-radius:10px;padding:8px;margin-top:8px;position:relative}
+.ev .x{position:absolute;top:4px;right:6px;background:none;color:#c2557a;padding:2px 6px}
+.add{margin-top:8px;background:#fbe3ea;color:#8a3a55;padding:6px 12px;font-size:12px}
+.preview{background:#e9dfe2;display:flex;flex-direction:column;align-items:center;padding:16px;gap:10px}
+.devs{display:flex;gap:6px}
+.devs button{padding:6px 12px;font-size:12px;background:#fff;color:#8a3a55}
+.devs button.on{background:#8a3a55;color:#fff}
+iframe{border:0;background:#fff;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.15);width:100%;flex:1;transition:max-width .3s}
+iframe.phone{max-width:390px}
+.hint{font-size:11px;color:#7a5a65;margin-top:6px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3b2a30;color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1}
+@media(max-width:900px){main{grid-template-columns:1fr;height:auto}form{border-right:0}.preview{height:85vh}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Generador de Invitaciones</h1>
+  <div class="btns">
+    <button class="ghost" id="saveCfg">Guardar proyecto (.json)</button>
+    <label class="ghost" style="margin:0;padding:10px 18px;border-radius:999px;cursor:pointer;font-weight:600;font-size:14px;display:inline-block;background:#fff;border:1px solid #e6a9bb;color:#8a3a55">Abrir proyecto<input type="file" id="loadCfg" accept=".json" hidden></label>
+    <button class="primary" id="download">⬇ Descargar index.html</button>
+  </div>
+</header>
+<main>
+<form id="f" onsubmit="return false">
+  <fieldset><legend>Tipo de evento</legend>
+    <select id="type">
+      <option value="boda">Boda</option>
+      <option value="xv">XV Años / Quinceañera</option>
+      <option value="baby">Baby shower</option>
+      <option value="bautizo">Bautizo</option>
+      <option value="cumple">Cumpleaños</option>
+    </select>
+    <label>Idiomas</label>
+    <select id="langs">
+      <option value="both">Español + Inglés (botón para cambiar)</option>
+      <option value="es">Solo español</option>
+      <option value="en">Solo inglés</option>
+    </select>
+  </fieldset>
+
+  <fieldset><legend>Protagonistas</legend>
+    <label>Nombres (como se verán grandes)</label>
+    <input id="names" value="Sofía & Daniel">
+    <label>Frase de bienvenida (español)</label>
+    <input id="tag_es" value="¡Nos casamos!">
+    <label>Frase de bienvenida (inglés)</label>
+    <input id="tag_en" value="We're getting married!">
+    <label>Padres o padrinos (opcional, uno por línea)</label>
+    <textarea id="parents">Con la bendición de nuestros padres
+Ana y Luis Martínez · Rosa y Jorge Pérez</textarea>
+  </fieldset>
+
+  <fieldset><legend>Fecha y lugar</legend>
+    <div class="row">
+      <div><label>Fecha</label><input type="date" id="date" value="2027-06-12"></div>
+      <div><label>Hora</label><input type="time" id="time" value="17:00"></div>
+    </div>
+    <label>Ciudad</label><input id="city" value="Fort Worth, Texas">
+    <div id="events"></div>
+    <button type="button" class="add" id="addEv">+ Agregar lugar o momento</button>
+  </fieldset>
+
+  <fieldset><legend>Textos</legend>
+    <label>Nuestra historia (español)</label>
+    <textarea id="story_es">Nos conocimos en una fiesta de cumpleaños en 2019. Un baile se convirtió en mil conversaciones, y hoy queremos celebrar el resto de nuestras vidas contigo.</textarea>
+    <label>Our story (inglés)</label>
+    <textarea id="story_en">We met at a birthday party in 2019. One dance turned into a thousand conversations, and now we want to celebrate the rest of our lives with you.</textarea>
+    <label>Código de vestimenta (es / en)</label>
+    <div class="row"><input id="dress_es" value="Formal. Evita el blanco."><input id="dress_en" value="Formal. Please avoid white."></div>
+    <label>Regalos (es / en)</label>
+    <div class="row"><input id="gift_es" value="Lluvia de sobres"><input id="gift_en" value="Envelope box at the reception"></div>
+  </fieldset>
+
+  <fieldset><legend>Confirmación (RSVP)</legend>
+    <label>Confirmar antes de</label><input type="date" id="rsvpBy" value="2027-05-01">
+    <label>Recibir respuestas por</label>
+    <select id="rsvpMode"><option value="wa">WhatsApp</option><option value="mail">Correo</option></select>
+    <label>Número de WhatsApp (con código de país) o correo</label>
+    <input id="rsvpTo" value="18175550123">
+    <p class="hint">WhatsApp: solo números, ej. 18175550123. Las respuestas llegan como mensaje ya escrito.</p>
+  </fieldset>
+
+  <fieldset><legend>Diseño</legend>
+    <label>Paleta de colores</label>
+    <div class="themes" id="themes"></div>
+    <label>Tipografía</label>
+    <select id="font">
+      <option value="vibes">Romántica (Great Vibes + Cormorant)</option>
+      <option value="playfair">Elegante (Playfair Display)</option>
+      <option value="parisienne">Delicada (Parisienne + Lora)</option>
+    </select>
+    <label>Foto principal</label>
+    <input type="file" id="photo" accept="image/*">
+    <p class="hint">La foto queda dentro del archivo, no necesitas subirla aparte. Usa una horizontal de menos de 1 MB.</p>
+    <label><input type="checkbox" id="showCount" checked style="width:auto"> Mostrar cuenta regresiva</label>
+    <label><input type="checkbox" id="showMusic" style="width:auto"> Botón de música (enlace a MP3)</label>
+    <input id="music" placeholder="https://...mp3">
+  </fieldset>
+  <p class="hint">Cuando termines: Descargar index.html → súbelo a Netlify Drop (arrastra el archivo) o a un repositorio de GitHub Pages.</p>
+</form>
+<section class="preview">
+  <div class="devs"><button type="button" class="on" data-d="phone">📱 Celular</button><button type="button" data-d="desk">💻 Computadora</button></div>
+  <iframe id="pv" class="phone" title="Vista previa"></iframe>
+</section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const THEMES={
+ rosa:{n:'Rosa y oro',bg:'#fff8f9',soft:'#fbe7ec',main:'#b34d6d',accent:'#c9a45c',text:'#3b2a30'},
+ salvia:{n:'Verde salvia',bg:'#f7f9f5',soft:'#e4ece0',main:'#5f7a5a',accent:'#c2a26b',text:'#2d3a2b'},
+ azul:{n:'Azul polvo',bg:'#f6f8fb',soft:'#dfe8f2',main:'#4f6f94',accent:'#b8a07a',text:'#26324a'},
+ terracota:{n:'Terracota',bg:'#fdf7f2',soft:'#f4e1d3',main:'#b5603c',accent:'#8c6a3f',text:'#3d2a20'},
+ lila:{n:'Lila',bg:'#faf7fc',soft:'#ece2f4',main:'#7d5a9c',accent:'#c9a45c',text:'#33283d'},
+ negro:{n:'Negro y oro',bg:'#141414',soft:'#232323',main:'#d4af6a',accent:'#d4af6a',text:'#f3eee6'}
+};
+const FONTS={
+ vibes:{css:'Great+Vibes&family=Cormorant+Garamond:wght@400;600',h:"'Great Vibes',cursive",b:"'Cormorant Garamond',serif",scale:1.25},
+ playfair:{css:'Playfair+Display:ital@0;1&family=Lato:wght@300;400',h:"'Playfair Display',serif",b:"Lato,sans-serif",scale:.9},
+ parisienne:{css:'Parisienne&family=Lora:wght@400;600',h:"Parisienne,cursive",b:"Lora,serif",scale:1.15}
+};
+let theme='rosa',photo='',events=[
+ {es:'Ceremonia',en:'Ceremony',time:'17:00',place:'Iglesia San Mateo',addr:'Fort Worth, TX'},
+ {es:'Recepción',en:'Reception',time:'19:00',place:'Hacienda Las Rosas',addr:'Fort Worth, TX'}
+];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function drawThemes(){
+ $('themes').innerHTML=Object.entries(THEMES).map(([k,t])=>`<div class="theme ${k===theme?'on':''}" data-k="${k}"><div class="sw"><span style="background:${t.bg}"></span><span style="background:${t.soft}"></span><span style="background:${t.main}"></span><span style="background:${t.accent}"></span></div>${t.n}</div>`).join('');
+ document.querySelectorAll('.theme').forEach(el=>el.onclick=()=>{theme=el.dataset.k;drawThemes();render()});
+}
+function drawEvents(){
+ $('events').innerHTML=events.map((e,i)=>`<div class="ev"><button type="button" class="x" data-i="${i}">✕</button>
+ <div class="row"><div><label>Nombre (es)</label><input data-i="${i}" data-f="es" value="${esc(e.es)}"></div><div><label>Name (en)</label><input data-i="${i}" data-f="en" value="${esc(e.en)}"></div></div>
+ <div class="row"><div><label>Hora</label><input type="time" data-i="${i}" data-f="time" value="${esc(e.time)}"></div><div><label>Lugar</label><input data-i="${i}" data-f="place" value="${esc(e.place)}"></div></div>
+ <label>Dirección (para el mapa)</label><input data-i="${i}" data-f="addr" value="${esc(e.addr)}"></div>`).join('');
+ $('events').querySelectorAll('input').forEach(inp=>inp.oninput=()=>{events[inp.dataset.i][inp.dataset.f]=inp.value;render()});
+ $('events').querySelectorAll('.x').forEach(b=>b.onclick=()=>{events.splice(b.dataset.i,1);drawEvents();render()});
+}
+$('addEv').onclick=()=>{events.push({es:'Fiesta',en:'Party',time:'20:00',place:'',addr:''});drawEvents();render()};
+
+function data(){
+ const ids=['type','langs','names','tag_es','tag_en','parents','date','time','city','story_es','story_en','dress_es','dress_en','gift_es','gift_en','rsvpBy','rsvpMode','rsvpTo','font','music'];
+ const d={};ids.forEach(i=>d[i]=$(i).value);d.showCount=$('showCount').checked;d.showMusic=$('showMusic').checked;d.theme=theme;d.events=events;d.photo=photo;return d;
+}
+function fmtDate(iso,lang){if(!iso)return'';const [y,m,dd]=iso.split('-').map(Number);return new Date(y,m-1,dd).toLocaleDateString(lang==='es'?'es-MX':'en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}
+function fmtTime(t,lang){if(!t)return'';const [h,m]=t.split(':').map(Number);const d=new Date(2000,0,1,h,m);return d.toLocaleTimeString(lang==='es'?'es-MX':'en-US',{hour:'numeric',minute:'2-digit'})}
+
+function build(d){
+ const t=THEMES[d.theme],F=FONTS[d.font];
+ const both=d.langs==='both',start=d.langs==='en'?'en':'es';
+ const T=(es,en)=>both?`<span class="l-es">${es}</span><span class="l-en">${en}</span>`:(start==='es'?es:en);
+ const map=a=>'https://maps.apple.com/search?query='+encodeURIComponent(a||d.city);
+ const gmap=a=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(a||d.city);
+ const hero=d.photo?`background-image:linear-gradient(to bottom,rgba(0,0,0,.15),rgba(0,0,0,.55)),url('${d.photo}')`:`background:linear-gradient(160deg,${t.soft},${t.main})`;
+ const parents=d.parents.trim()?`<section class="parents">${d.parents.trim().split('\n').map(l=>`<p>${esc(l)}</p>`).join('')}</section>`:'';
+ const evs=d.events.map(e=>`<div class="card"><h3>${T(esc(e.es),esc(e.en))}</h3><p class="time">${T(fmtTime(e.time,'es'),fmtTime(e.time,'en'))}</p><p class="place">${esc(e.place)}</p><p class="addr">${esc(e.addr)}</p><div class="mapbtns"><a href="${map(e.addr)}" target="_blank">Apple Maps</a><a href="${gmap(e.addr)}" target="_blank">Google Maps</a></div></div>`).join('');
+ const tl=[...d.events].sort((a,b)=>a.time.localeCompare(b.time)).map(e=>`<li><b>${T(fmtTime(e.time,'es'),fmtTime(e.time,'en'))}</b> ${T(esc(e.es),esc(e.en))}</li>`).join('');
+ const target=`${d.date}T${d.time||'12:00'}:00`;
+ const cfg=JSON.stringify({target,mode:d.rsvpMode,to:d.rsvpTo,names:d.names,start,both});
+ return `<!DOCTYPE html><html lang="${start}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(d.names)}</title><meta property="og:title" content="${esc(d.names)}"><meta property="og:description" content="${esc(d.tag_es)} · ${fmtDate(d.date,'es')}">
+<link href="https://fonts.googleapis.com/css2?family=${F.css}&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:${F.b};background:${t.bg};color:${t.text};font-size:18px;line-height:1.6}
+${both?`body.es .l-en,body.en .l-es{display:none}`:''}
+.lang{position:fixed;top:14px;right:14px;z-index:9;background:${t.bg}e6;border:1px solid ${t.accent};border-radius:999px;display:${both?'flex':'none'};overflow:hidden}
+.lang button{border:0;background:none;padding:6px 12px;font-family:inherit;color:${t.text};cursor:pointer;font-size:14px}
+body.es .lang [data-l=es],body.en .lang [data-l=en]{background:${t.main};color:${t.bg}}
+.hero{min-height:100vh;${hero};background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;color:#fff;padding:40px 20px}
+.hero small{letter-spacing:.3em;text-transform:uppercase;font-size:13px}
+.hero h1{font-family:${F.h};font-weight:400;font-size:${Math.round(64*F.scale)}px;line-height:1.1;margin:14px 0;text-shadow:0 2px 12px rgba(0,0,0,.3)}
+.hero .date{font-size:20px}.hero .cta{margin-top:26px;display:inline-block;padding:12px 28px;border:1px solid #fff;border-radius:999px;color:#fff;text-decoration:none;letter-spacing:.1em;font-size:15px;backdrop-filter:blur(4px)}
+section{max-width:720px;margin:0 auto;padding:64px 22px;text-align:center}
+h2{font-family:${F.h};font-weight:400;font-size:${Math.round(44*F.scale)}px;color:${t.main};margin-bottom:16px}
+.orn{width:80px;height:1px;background:${t.accent};margin:0 auto 22px;position:relative}.orn:after{content:'♥';position:absolute;left:50%;top:-12px;transform:translateX(-50%);background:${t.bg};color:${t.accent};padding:0 8px;font-size:14px}
+.parents{padding:40px 22px 0;font-style:italic;opacity:.85}
+.count{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.count div{background:${t.soft};border-radius:16px;padding:14px 10px;min-width:74px}.count b{display:block;font-size:30px;color:${t.main}}.count span{font-size:13px;text-transform:uppercase;letter-spacing:.1em}
+.cards{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:${t.soft};border-radius:20px;padding:26px 18px}.card h3{font-family:${F.h};font-weight:400;font-size:${Math.round(34*F.scale)}px;color:${t.main}}
+.time{font-weight:600}.place{font-size:20px}.addr{font-size:15px;opacity:.75}
+.mapbtns{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}.mapbtns a{font-size:13px;padding:7px 14px;border-radius:999px;border:1px solid ${t.main};color:${t.main};text-decoration:none}
+.tl{list-style:none;text-align:left;max-width:380px;margin:0 auto;border-left:2px solid ${t.accent};padding-left:20px}.tl li{margin:12px 0;position:relative}.tl li:before{content:'';position:absolute;left:-27px;top:9px;width:12px;height:12px;border-radius:50%;background:${t.main}}
+.alt{background:${t.soft};max-width:none}.alt>*{max-width:680px;margin-left:auto;margin-right:auto}
+form{display:grid;gap:12px;text-align:left;max-width:460px;margin:0 auto}
+input,select,textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid ${t.accent}88;background:${t.bg};font-family:inherit;font-size:16px;color:${t.text}}
+.radios{display:flex;gap:16px}.radios label{display:flex;gap:6px;align-items:center}.radios input{width:auto}
+.send{background:${t.main};color:${t.bg};border:0;padding:14px;border-radius:999px;font-size:17px;cursor:pointer;font-family:inherit}
+.thanks{display:none;font-size:22px;color:${t.main}}
+footer{text-align:center;padding:40px 20px 60px}footer p{font-family:${F.h};font-size:${Math.round(38*F.scale)}px;color:${t.main}}
+.music{position:fixed;bottom:16px;right:16px;width:48px;height:48px;border-radius:50%;border:0;background:${t.main};color:${t.bg};font-size:20px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.fade{opacity:0;transform:translateY(20px);transition:1s}.fade.in{opacity:1;transform:none}
+</style></head>
+<body class="${start}">
+<div class="lang"><button data-l="es">ES</button><button data-l="en">EN</button></div>
+<header class="hero"><small>${T('Te invitamos','You are invited')}</small><h1>${esc(d.names)}</h1><p>${T(esc(d.tag_es),esc(d.tag_en))}</p><p class="date">${T(fmtDate(d.date,'es'),fmtDate(d.date,'en'))}</p><p>${esc(d.city)}</p><a class="cta" href="#rsvp">${T('Confirmar asistencia','RSVP')}</a></header>
+${parents}
+${d.showCount?`<section class="fade"><h2>${T('Faltan','Countdown')}</h2><div class="orn"></div><div class="count"><div><b id="cd">0</b><span>${T('Días','Days')}</span></div><div><b id="ch">0</b><span>${T('Horas','Hours')}</span></div><div><b id="cm">0</b><span>${T('Min','Min')}</span></div><div><b id="cs">0</b><span>${T('Seg','Sec')}</span></div></div></section>`:''}
+${(d.story_es||d.story_en)?`<section class="fade"><h2>${T('Nuestra historia','Our story')}</h2><div class="orn"></div><p>${T(esc(d.story_es),esc(d.story_en))}</p></section>`:''}
+<section class="alt fade"><h2>${T('Dónde y cuándo','When & where')}</h2><div class="orn"></div><div class="cards">${evs}</div></section>
+${d.events.length>1?`<section class="fade"><h2>${T('Itinerario','Timeline')}</h2><div class="orn"></div><ul class="tl">${tl}</ul></section>`:''}
+<section class="fade"><h2>${T('Detalles','Details')}</h2><div class="orn"></div>
+${d.dress_es?`<p><b>${T('Vestimenta','Dress code')}:</b> ${T(esc(d.dress_es),esc(d.dress_en))}</p>`:''}
+${d.gift_es?`<p><b>${T('Regalos','Gifts')}:</b> ${T(esc(d.gift_es),esc(d.gift_en))}</p>`:''}</section>
+<section class="alt fade" id="rsvp"><h2>${T('Confirma tu asistencia','RSVP')}</h2><div class="orn"></div>
+<p style="margin-bottom:20px">${T('Por favor confirma antes del '+fmtDate(d.rsvpBy,'es'),'Please reply by '+fmtDate(d.rsvpBy,'en'))}</p>
+<form id="rf"><input name="n" required placeholder="Nombre / Name">
+<select name="g">${[1,2,3,4,5,6].map(n=>`<option>${n}</option>`).join('')}</select>
+<div class="radios"><label><input type="radio" name="a" value="Sí / Yes" checked> ${T('Sí asistiré','Yes, I’ll be there')}</label><label><input type="radio" name="a" value="No"> ${T('No podré','Can’t make it')}</label></div>
+<textarea name="m" rows="3" placeholder="Mensaje / Message"></textarea>
+<button class="send">${T('Enviar','Send')}</button></form>
+<p class="thanks" id="ty">${T('¡Gracias! Nos vemos pronto ♥','Thank you! See you soon ♥')}</p></section>
+<footer><p>${esc(d.names)}</p></footer>
+${d.showMusic&&d.music?`<audio id="au" src="${esc(d.music)}" loop></audio><button class="music" id="mb">♪</button>`:''}
+<script>
+const C=${cfg};
+document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{document.body.className=b.dataset.l;document.documentElement.lang=b.dataset.l});
+const tg=new Date(C.target).getTime();function tick(){const el=document.getElementById('cd');if(!el)return;let s=Math.max(0,(tg-Date.now())/1000);document.getElementById('cd').textContent=Math.floor(s/86400);document.getElementById('ch').textContent=Math.floor(s%86400/3600);document.getElementById('cm').textContent=Math.floor(s%3600/60);document.getElementById('cs').textContent=Math.floor(s%60)}tick();setInterval(tick,1000);
+document.getElementById('rf').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);const txt='RSVP '+C.names+'\\nNombre: '+f.get('n')+'\\nInvitados: '+f.get('g')+'\\nAsistencia: '+f.get('a')+'\\nMensaje: '+(f.get('m')||'');
+const url=C.mode==='wa'?'https://wa.me/'+C.to.replace(/\\D/g,'')+'?text='+encodeURIComponent(txt):'mailto:'+C.to+'?subject='+encodeURIComponent('RSVP '+C.names)+'&body='+encodeURIComponent(txt);
+window.open(url,'_blank');e.target.style.display='none';document.getElementById('ty').style.display='block'};
+const io=new IntersectionObserver(es=>es.forEach(x=>x.isIntersecting&&x.target.classList.add('in')),{threshold:.15});document.querySelectorAll('.fade').forEach(s=>io.observe(s));
+const mb=document.getElementById('mb');if(mb)mb.onclick=()=>{const a=document.getElementById('au');a.paused?a.play():a.pause()};
+<\/script></body></html>`;
+}
+
+let tmr;function render(){clearTimeout(tmr);tmr=setTimeout(()=>{$('pv').srcdoc=build(data())},150)}
+function toast(m){$('toast').textContent=m;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2500)}
+function dl(name,content,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click()}
+
+const PRESETS={boda:['¡Nos casamos!',"We're getting married!",'Sofía & Daniel'],xv:['Mis XV Años','My Quinceañera','Valentina'],baby:['Baby Shower','Baby Shower','Bebé Martínez'],bautizo:['Mi Bautizo','My Baptism','Mateo'],cumple:['¡Vamos a celebrar!',"Let's celebrate!",'Camila cumple 30']};
+$('type').onchange=()=>{const p=PRESETS[$('type').value];$('tag_es').value=p[0];$('tag_en').value=p[1];$('names').value=p[2];render()};
+$('photo').onchange=e=>{const file=e.target.files[0];if(!file)return;const img=new Image();const r=new FileReader();r.onload=()=>{img.onload=()=>{const c=document.createElement('canvas');const s=Math.min(1,1600/img.width);c.width=img.width*s;c.height=img.height*s;c.getContext('2d').drawImage(img,0,0,c.width,c.height);photo=c.toDataURL('image/jpeg',.8);render();toast('Foto lista')};img.src=r.result};r.readAsDataURL(file)};
+$('download').onclick=()=>{dl('index.html',build(data()),'text/html');toast('Descargado: súbelo a Netlify o GitHub Pages')};
+$('saveCfg').onclick=()=>{const d=data();dl((d.names||'invitacion').replace(/[^\w]+/g,'-')+'.json',JSON.stringify(d),'application/json');toast('Proyecto guardado')};
+$('loadCfg').onchange=e=>{const r=new FileReader();r.onload=()=>{const d=JSON.parse(r.result);Object.keys(d).forEach(k=>{if($(k)&&typeof d[k]!=='object'&&typeof d[k]!=='boolean')$(k).value=d[k]});$('showCount').checked=d.showCount;$('showMusic').checked=d.showMusic;theme=d.theme||'rosa';events=d.events||[];photo=d.photo||'';drawThemes();drawEvents();render();toast('Proyecto abierto')};r.readAsText(e.target.files[0])};
+document.querySelectorAll('.devs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.devs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');$('pv').className=b.dataset.d==='phone'?'phone':''});
+$('f').addEventListener('input',render);$('f').addEventListener('change',render);
+drawThemes();drawEvents();render();
+</script>
+</body>
+</html>
